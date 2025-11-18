@@ -114,28 +114,37 @@
       section.pricing{grid-template-columns:1fr}
     }
 
-    /* small decorative */
     .badge{display:inline-block;background:rgba(255,31,31,0.09);color:var(--accent);padding:6px 10px;border-radius:999px;font-weight:700;font-size:12px}
     .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', monospace}
   </style>
 </head>
 <body>
   <div class="wrap">
+
     <!-- NAV -->
     <header class="nav card" role="banner">
       <div class="brand">
         <div class="logo">TF</div>
         <div>
-          <h1>TokenFactory</h1>
+          <h1>TokenFactory</hh1>
           <p>Crear SPL tokens — Solana (Mainnet)</p>
         </div>
       </div>
 
+      <!-- ACCIONES (con botón Conectar Wallet agregado) -->
       <div class="actions">
         <nav>
           <button class="btn btn-ghost" onclick="scrollToSection('features')">Características</button>
           <button class="btn btn-ghost" onclick="scrollToSection('pricing')">Precios</button>
         </nav>
+
+        <!-- 🔴 Nuevo botón: Conectar wallet -->
+        <button 
+          class="btn btn-primary" 
+          style="padding:10px 16px"
+          onclick="connectWallet()"
+        >Conectar wallet</button>
+
         <div style="display:flex;gap:10px">
           <button class="btn btn-ghost" onclick="location.href='/dashboard'">Dashboard</button>
           <button class="btn btn-primary" onclick="location.href='/create'">Crear token</button>
@@ -210,7 +219,7 @@
 
         <div class="card" style="display:flex;flex-direction:column;gap:10px;align-items:flex-start">
           <div style="display:flex;align-items:center;gap:12px">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
               <path d="M12 2L19 8v8l-7 6-7-6V8l7-6z" fill="#ff1f1f"/>
             </svg>
             <div>
@@ -222,7 +231,9 @@
           <div style="width:100%;display:flex;gap:8px;">
             <div style="flex:1;font-size:13px;color:var(--muted)">
               <div style="font-weight:700">PLATFORM</div>
-              <div class="mono" style="margin-top:6px;color:#fff;background:rgba(255,255,255,0.03);padding:8px;border-radius:8px;overflow:auto">H1mn89WUyB55iGWFhCFrL5PP7KjniG5JT3beCsMwVHHv</div>
+              <div class="mono" style="margin-top:6px;color:#fff;background:rgba(255,255,255,0.03);padding:8px;border-radius:8px;overflow:auto">
+                H1mn89WUyB55iGWFhCFrL5PP7KjniG5JT3beCsMwVHHv
+              </div>
             </div>
           </div>
         </div>
@@ -292,9 +303,29 @@
     function demoCreate(){
       const m = document.getElementById('panelMsg');
       m.innerHTML = 'Simulación: abrirá Phantom para pagar y firmar (demo).';
-      // This is a non-functional demo UI: actual wallet interactions happen in the app.
       setTimeout(()=> m.innerHTML = 'En la app real, Phantom pedirá firmas para transferir y crear el mint.', 1800);
     }
+
+    /* -----------------------------
+       🟢 FUNCIÓN REAL: Conectar WALLET (Phantom)
+    ----------------------------- */
+    async function connectWallet() {
+      try {
+        const provider = window.solana;
+
+        if (!provider || !provider.isPhantom) {
+          alert("Necesitas Phantom instalado.");
+          return;
+        }
+
+        const resp = await provider.connect();
+        alert("Wallet conectada: " + resp.publicKey.toString());
+
+      } catch (err) {
+        alert("Error al conectar wallet: " + err.message);
+      }
+    }
   </script>
+
 </body>
 </html>
