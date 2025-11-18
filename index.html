@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Token Factory</title>
 
-  <!-- estilos simples -->
   <style>
     body {
       margin: 0;
@@ -46,20 +45,14 @@
       background: #ff0000;
       color: white;
     }
-
-    .btn-primary:hover {
-      background: #cc0000;
-    }
+    .btn-primary:hover { background: #cc0000; }
 
     .btn-error {
       background: #444;
       color: #ff0000;
       border: 1px solid #ff0000;
     }
-
-    .btn-error:hover {
-      background: #550000;
-    }
+    .btn-error:hover { background: #550000; }
 
     .main {
       margin-top: 150px;
@@ -77,16 +70,41 @@
       margin-top: -10px;
       color: #ccc;
     }
+
+    /* NOTIFICACIONES */
+    #notif {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #111;
+      border-left: 5px solid #ff0000;
+      padding: 15px 20px;
+      border-radius: 8px;
+      color: white;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: 0.3s ease;
+      z-index: 200;
+      font-size: 16px;
+      pointer-events: none;
+    }
+
+    #notif.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
   </style>
 </head>
 
 <body>
 
+  <!-- NOTIFICACIÓN -->
+  <div id="notif"></div>
+
   <!-- HEADER -->
   <header>
     <div class="logo">TOKEN FACTORY</div>
 
-    <!-- Botón de wallet -->
     <button 
       id="walletBtn"
       class="btn btn-primary"
@@ -101,7 +119,6 @@
     <h1>Crea tokens en Solana</h1>
     <p>Simple, rápido y en mainnet</p>
 
-    <!-- botón de crear token (como lo tenías antes) -->
     <button 
       class="btn btn-primary"
       onclick="location.href='/create'"
@@ -111,11 +128,17 @@
     </button>
   </div>
 
-  <!-- SCRIPT DE CONEXIÓN WALLET -->
+  <!-- SCRIPT -->
   <script>
     let walletConnected = false;
 
-    // Detecta si Phantom está instalada y si ya estaba conectada antes
+    function showNotif(msg) {
+      const n = document.getElementById('notif');
+      n.innerText = msg;
+      n.classList.add("show");
+      setTimeout(() => n.classList.remove("show"), 2500);
+    }
+
     document.addEventListener("DOMContentLoaded", async () => {
       const provider = window.solana;
 
@@ -130,9 +153,7 @@
             btn.classList.remove("btn-primary");
             btn.classList.add("btn-error");
           }
-        } catch (e) {
-          // no estaba conectado antes
-        }
+        } catch {}
       }
     });
 
@@ -142,27 +163,25 @@
 
       try {
         if (!provider || !provider.isPhantom) {
-          alert("Necesitas Phantom para usar esta función.");
+          showNotif("Instala Phantom para continuar");
           return;
         }
 
         if (!walletConnected) {
-          // conectar
           const resp = await provider.connect();
           walletConnected = true;
 
-          alert("✅ La wallet se conectó correctamente");
+          showNotif("✅ La wallet se conectó correctamente");
 
           btn.innerText = "Desconectar";
           btn.classList.remove("btn-primary");
           btn.classList.add("btn-error");
 
         } else {
-          // desconectar
           await provider.disconnect();
           walletConnected = false;
 
-          alert("🔌 Wallet desconectada");
+          showNotif("🔌 Wallet desconectada");
 
           btn.innerText = "Conectar wallet";
           btn.classList.remove("btn-error");
@@ -170,7 +189,7 @@
         }
 
       } catch (err) {
-        alert("⚠️ Error: " + err.message);
+        showNotif("⚠️ Error: " + err.message);
       }
     }
   </script>
