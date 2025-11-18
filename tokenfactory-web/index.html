@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TokenFactory — Crea SPL tokens en Solana</title>
+
+  <!-- Minimal, self-contained styles (Black & Red theme) -->
+  <style>
+    :root{
+      --bg:#0b0b0b;
+      --card:#0f1113;
+      --muted:#9aa8b8;
+      --accent:#ff1f1f;
+      --accent-2:#e53939;
+      --glass: rgba(255,255,255,0.03);
+      --max-width:1100px;
+      --radius:14px;
+      --shadow: 0 8px 30px rgba(0,0,0,0.6);
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,#050505 0%, #0b0b0b 100%);
+      color:#e6eef8;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:40px 20px;
+      display:flex;
+      justify-content:center;
+    }
+
+    .wrap{width:100%;max-width:var(--max-width);}
+
+    header.nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      padding:18px 22px;
+      border-radius:12px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      box-shadow:var(--shadow);
+      margin-bottom:28px;
+    }
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:44px;height:44px;border-radius:8px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;
+      box-shadow:0 6px 18px rgba(255,31,31,0.14);
+    }
+    .brand h1{margin:0;font-size:18px;letter-spacing:-0.4px}
+    .brand p{margin:0;font-size:12px;color:var(--muted)}
+
+    nav.actions{display:flex;gap:12px;align-items:center}
+    .btn{padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+    .btn-ghost{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.03)}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;box-shadow:0 8px 24px rgba(255,31,31,0.12)}
+
+    main.hero{
+      display:grid;
+      grid-template-columns:1fr 460px;
+      gap:28px;
+      align-items:center;
+    }
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:28px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,0.02);
+    }
+
+    .hero-left h2{font-size:36px;margin:0 0 12px 0}
+    .hero-left p{color:var(--muted);line-height:1.6;margin:0 0 18px}
+    .cta-row{display:flex;gap:12px;align-items:center}
+    .stat-row{display:flex;gap:14px;margin-top:18px}
+    .stat{background:var(--glass);padding:12px;border-radius:10px;font-size:13px;color:var(--muted);}
+
+    .hero-right{display:flex;flex-direction:column;gap:12px}
+    .panel-title{font-size:13px;color:var(--muted);margin-bottom:6px}
+    .panel .field{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+    .field input, .field select{
+      padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);
+      background:transparent;color:inherit;font-size:14px;
+    }
+    .small-muted{font-size:12px;color:var(--muted)}
+
+    section.features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+    .feature{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
+    .feature h4{margin:0 0 8px 0}
+    .feature p{margin:0;color:var(--muted);font-size:13px}
+
+    section.pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
+    .price{padding:18px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));border:1px solid rgba(255,255,255,0.02)}
+    .price h3{margin:0 0 6px 0}
+    .price .amount{font-size:20px;color:var(--accent);margin-bottom:10px}
+
+    footer{margin-top:40px;text-align:center;color:var(--muted);font-size:13px;padding:20px}
+
+    /* responsive */
+    @media (max-width:1000px){
+      main.hero{grid-template-columns:1fr}
+      .hero-right{order:2}
+    }
+    @media (max-width:520px){
+      .brand h1{font-size:16px}
+      .hero-left h2{font-size:26px}
+      .stat-row{flex-direction:column;gap:10px}
+      section.features{grid-template-columns:1fr}
+      section.pricing{grid-template-columns:1fr}
+    }
+
+    /* small decorative */
+    .badge{display:inline-block;background:rgba(255,31,31,0.09);color:var(--accent);padding:6px 10px;border-radius:999px;font-weight:700;font-size:12px}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', monospace}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- NAV -->
+    <header class="nav card" role="banner">
+      <div class="brand">
+        <div class="logo">TF</div>
+        <div>
+          <h1>TokenFactory</h1>
+          <p>Crear SPL tokens — Solana (Mainnet)</p>
+        </div>
+      </div>
+
+      <div class="actions">
+        <nav>
+          <button class="btn btn-ghost" onclick="scrollToSection('features')">Características</button>
+          <button class="btn btn-ghost" onclick="scrollToSection('pricing')">Precios</button>
+        </nav>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-ghost" onclick="location.href='/dashboard'">Dashboard</button>
+          <button class="btn btn-primary" onclick="location.href='/create'">Crear token</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- HERO -->
+    <main class="hero">
+      <div class="hero-left card">
+        <div class="badge">Mainnet · Pagos en SOL · Wallet-native</div>
+        <h2>Crea tu token en Solana en minutos — segura, rápida y profesional</h2>
+        <p>Servicio orientado a proyectos serios: los usuarios pagan la comisión en SOL desde su wallet y además abonan la tarifa del servicio. Entregamos la mint address y soporte para listado.</p>
+
+        <div class="cta-row">
+          <button class="btn btn-primary" onclick="location.href='/create'">Pagar y crear</button>
+          <button class="btn btn-ghost" onclick="scrollToSection('pricing')">Ver precios</button>
+        </div>
+
+        <div class="stat-row" style="margin-top:18px">
+          <div class="stat"><strong>+0</strong> Tokens creados</div>
+          <div class="stat"><strong>Mainnet</strong> Red</div>
+          <div class="stat"><strong>Soporte</strong> 24/7</div>
+        </div>
+
+        <div style="margin-top:18px" class="small-muted">
+          <strong>Advertencia:</strong> Verifica cumplimiento legal en tu jurisdicción. TokenFactory no se hace responsable por usos indebidos.
+        </div>
+      </div>
+
+      <aside class="hero-right">
+        <div class="card panel">
+          <div class="panel-title">Crear token — Rápido</div>
+
+          <div class="field">
+            <label class="small-muted">Nombre</label>
+            <input id="sampleName" placeholder="RoadCoin" value="RoadCoin" />
+          </div>
+
+          <div class="field">
+            <label class="small-muted">Símbolo</label>
+            <input id="sampleSymbol" placeholder="ROAD" value="ROAD" />
+          </div>
+
+          <div class="field">
+            <label class="small-muted">Suministro</label>
+            <input id="sampleSupply" placeholder="1000000" value="1000000" />
+          </div>
+
+          <div class="field" style="display:flex;gap:8px">
+            <div style="flex:1">
+              <label class="small-muted">Decimales</label>
+              <select id="sampleDecimals">
+                <option>9</option>
+                <option>6</option>
+                <option>0</option>
+              </select>
+            </div>
+            <div style="flex:1">
+              <label class="small-muted">Destino</label>
+              <input id="sampleDest" placeholder="Tu wallet (opcional)" />
+            </div>
+          </div>
+
+          <div style="margin-top:8px;display:flex;gap:10px">
+            <button class="btn btn-primary" onclick="demoCreate()">Probar diseño</button>
+            <button class="btn btn-ghost" onclick="copyExample()">Copiar ejemplo</button>
+          </div>
+
+          <div id="panelMsg" style="margin-top:12px;color:var(--muted);font-size:13px">Se enviará la transacción para firmar desde tu wallet (Phantom).</div>
+        </div>
+
+        <div class="card" style="display:flex;flex-direction:column;gap:10px;align-items:flex-start">
+          <div style="display:flex;align-items:center;gap:12px">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <path d="M12 2L19 8v8l-7 6-7-6V8l7-6z" fill="#ff1f1f"/>
+            </svg>
+            <div>
+              <div style="font-weight:700">Servicio</div>
+              <div style="color:var(--muted);font-size:13px">Pago automático en SOL, verificación y entrega de mint.</div>
+            </div>
+          </div>
+
+          <div style="width:100%;display:flex;gap:8px;">
+            <div style="flex:1;font-size:13px;color:var(--muted)">
+              <div style="font-weight:700">PLATFORM</div>
+              <div class="mono" style="margin-top:6px;color:#fff;background:rgba(255,255,255,0.03);padding:8px;border-radius:8px;overflow:auto">H1mn89WUyB55iGWFhCFrL5PP7KjniG5JT3beCsMwVHHv</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- FEATURES -->
+    <section id="features" class="features">
+      <div class="feature card">
+        <h4>Wallet-native</h4>
+        <p>Crea el token firmando con la wallet del usuario. El usuario paga el gas y la tarifa en SOL.</p>
+      </div>
+      <div class="feature card">
+        <h4>Rápido y seguro</h4>
+        <p>Proceso optimizado para crear mint, cuentas asociadas y mintear supply sin pasos innecesarios.</p>
+      </div>
+      <div class="feature card">
+        <h4>Soporte y listados</h4>
+        <p>Ofrecemos servicios premium adicionales: marketing, listados y auditoría.</p>
+      </div>
+    </section>
+
+    <!-- PRICING -->
+    <section id="pricing" class="pricing" style="margin-top:24px">
+      <div class="price card">
+        <h3>Basic</h3>
+        <div class="amount">0.01 SOL</div>
+        <p class="small-muted">Creación simple — entrega mint address y soporte básico.</p>
+        <div style="margin-top:12px"><button class="btn btn-primary">Elegir</button></div>
+      </div>
+      <div class="price card">
+        <h3>Pro</h3>
+        <div class="amount">0.05 SOL</div>
+        <p class="small-muted">Incluye kit marketing y verificación acelerada.</p>
+        <div style="margin-top:12px"><button class="btn btn-primary">Elegir</button></div>
+      </div>
+      <div class="price card">
+        <h3>Enterprise</h3>
+        <div class="amount">Contacto</div>
+        <p class="small-muted">Soluciones a medida, auditoría y colaboración.</p>
+        <div style="margin-top:12px"><button class="btn btn-primary">Contactar</button></div>
+      </div>
+    </section>
+
+    <footer>
+      © <span id="year"></span> TokenFactory · Hecho para proyectos ambiciosos · <span style="color:var(--muted)">Soporte: hola@tokenfactory.example</span>
+    </footer>
+  </div>
+
+  <script>
+    document.getElementById('year').innerText = new Date().getFullYear();
+
+    function scrollToSection(id){
+      const el = document.getElementById(id);
+      if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+
+    function copyExample(){
+      const txt = `Name: ${document.getElementById('sampleName').value}\nSymbol: ${document.getElementById('sampleSymbol').value}\nSupply: ${document.getElementById('sampleSupply').value}\nDecimals: ${document.getElementById('sampleDecimals').value}`;
+      navigator.clipboard?.writeText(txt).then(()=> {
+        const m = document.getElementById('panelMsg');
+        m.innerText='Ejemplo copiado al portapapeles ✅';
+        setTimeout(()=> m.innerText='Se enviará la transacción para firmar desde tu wallet (Phantom).', 2600);
+      });
+    }
+
+    function demoCreate(){
+      const m = document.getElementById('panelMsg');
+      m.innerHTML = 'Simulación: abrirá Phantom para pagar y firmar (demo).';
+      // This is a non-functional demo UI: actual wallet interactions happen in the app.
+      setTimeout(()=> m.innerHTML = 'En la app real, Phantom pedirá firmas para transferir y crear el mint.', 1800);
+    }
+  </script>
+</body>
+</html>
