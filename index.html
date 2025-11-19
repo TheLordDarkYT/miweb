@@ -77,7 +77,6 @@
       color: #ccc;
     }
 
-    /* NOTIFICACIONES */
     #notif {
       position: fixed;
       top: 20px;
@@ -94,68 +93,74 @@
       font-size: 16px;
       pointer-events: none;
     }
-
     #notif.show {
       opacity: 1;
       transform: translateY(0);
     }
 
-    /* MODAL CREAR TOKEN */
-    #tokenModal {
+    /* MODAL */
+    #modal {
       display: none;
       position: fixed;
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
-      background:rgba(0,0,0,0.85);
-      backdrop-filter: blur(6px);
-      justify-content:center;
-      align-items:center;
-      z-index:300;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(4px);
+      justify-content: center;
+      align-items: center;
+      z-index: 300;
     }
-
-    #tokenModalContent {
-      background:#111;
-      padding:30px;
-      border-radius:10px;
-      width:350px;
-      text-align:center;
-      position:relative;
+    #modalContent {
+      background: #111;
+      padding: 25px;
+      border-radius: 10px;
+      width: 350px;
+      text-align: left;
+      border: 1px solid #ff0000;
     }
-
-    #tokenModalContent h2 {
-      color:#ff0000;
-      margin-bottom:20px;
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background: #222;
+      color: white;
     }
-
-    #tokenModalContent input {
-      width:100%;
-      padding:10px;
-      margin-bottom:10px;
-      border-radius:6px;
-      border:none;
-      outline:none;
-      background:#222;
-      color:white;
-    }
-
-    #tokenModalContent input::placeholder {
-      color:#888;
-    }
-
-    #tokenModalContent button {
-      width:100%;
-      margin-top:10px;
-    }
-
   </style>
+
+  <!-- Solana Web3 -->
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+  <script src="https://unpkg.com/@solana/spl-token@latest"></script>
 </head>
 
 <body>
 
   <!-- NOTIFICACIÓN -->
   <div id="notif"></div>
+
+  <!-- MODAL -->
+  <div id="modal">
+    <div id="modalContent">
+      <h2>Crear Token</h2>
+
+      <label>Nombre del token</label>
+      <input id="tokenName" placeholder="Ej: RoadCoin" />
+
+      <label>Símbolo</label>
+      <input id="tokenSymbol" placeholder="Ej: RDC" />
+
+      <label>Supply</label>
+      <input id="tokenSupply" type="number" placeholder="Ej: 1000000" />
+
+      <button class="btn btn-primary" style="margin-top:15px;width:100%;" onclick="startTokenCreation()">
+        Pagar 0.058 SOL y crear token
+      </button>
+
+      <button class="btn btn-error" style="margin-top:10px;width:100%;" onclick="closeModal()">
+        Cancelar
+      </button>
+    </div>
+  </div>
 
   <!-- HEADER -->
   <header>
@@ -176,35 +181,25 @@
     <p>Simple, rápido y en mainnet</p>
 
     <button 
-      id="openCreateToken"
       class="btn btn-primary"
+      onclick="openModal()"
       style="margin-top:30px"
     >
       Crear token
     </button>
   </div>
 
-  <!-- MODAL CREAR TOKEN -->
-  <div id="tokenModal">
-    <div id="tokenModalContent">
-      <h2>Crear Token</h2>
-      <input id="tokenName" placeholder="Nombre del token" />
-      <input id="tokenSymbol" placeholder="Símbolo (ej: TKN)" />
-      <input id="tokenDecimals" type="number" placeholder="Decimales (ej: 9)" />
-      <input id="tokenSupply" type="number" placeholder="Cantidad total" />
-      <button id="createTokenBtn" class="btn btn-primary">Crear Token</button>
-      <button id="closeTokenModal" class="btn btn-error">Cancelar</button>
-    </div>
-  </div>
-
-  <!-- LIBRERIAS SOLANA -->
-  <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@latest/lib/index.iife.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@latest/lib/index.iife.min.js"></script>
-
   <!-- SCRIPT -->
   <script>
     let walletConnected = false;
     let walletAddress = "";
+    const TOKEN_CREATION_PRICE = 0.058; // SOL
+    const ADMIN_WALLET = "H1mn89WUyB55iGWFhCFrL5PP7KjniG5JT3beCsMwVHHv";
+
+    const connection = new solanaWeb3.Connection(
+      "https://api.mainnet-beta.solana.com",
+      "confirmed"
+    );
 
     function showNotif(msg) {
       const n = document.getElementById('notif');
@@ -213,27 +208,21 @@
       setTimeout(() => n.classList.remove("show"), 2500);
     }
 
-    // Al cargar la página, revisa si Phantom ya está conectada
     document.addEventListener("DOMContentLoaded", async () => {
       const provider = window.solana;
-
       if (provider && provider.isPhantom) {
         try {
           const resp = await provider.connect({ onlyIfTrusted: true });
-
           if (resp.publicKey) {
             walletConnected = true;
             walletAddress = resp.publicKey.toString();
             updateWalletButton();
             showNotif("✅ Wallet conectada automáticamente");
           }
-        } catch (err) {
-          console.warn("No hay conexión previa:", err);
-        }
+        } catch {}
       }
     });
 
-    // Actualiza el botón según el estado
     function updateWalletButton() {
       const btn = document.getElementById("walletBtn");
       if (walletConnected) {
@@ -261,7 +250,7 @@
           walletConnected = true;
           walletAddress = resp.publicKey.toString();
           updateWalletButton();
-          showNotif("✅ La wallet se conectó correctamente");
+          showNotif("🟢 Wallet conectada");
         } else {
           await provider.disconnect();
           walletConnected = false;
@@ -270,75 +259,99 @@
           showNotif("🔌 Wallet desconectada");
         }
       } catch (err) {
-        console.error(err);
         showNotif("⚠️ Error: " + (err.message || err));
       }
     }
 
-    // ABRIR MODAL
-    document.getElementById("openCreateToken").addEventListener("click", () => {
-      if (!walletConnected) {
-        showNotif("⚠️ Conecta tu wallet primero");
-        return;
+    function openModal() {
+      if (!walletConnected) return showNotif("Conecta tu wallet primero");
+      document.getElementById("modal").style.display = "flex";
+    }
+    function closeModal() {
+      document.getElementById("modal").style.display = "none";
+    }
+
+    // COBRAR AL USUARIO
+    async function chargeUser() {
+      const provider = window.solana;
+      const lamports = TOKEN_CREATION_PRICE * 1e9;
+
+      const transaction = new solanaWeb3.Transaction().add(
+        solanaWeb3.SystemProgram.transfer({
+          fromPubkey: provider.publicKey,
+          toPubkey: new solanaWeb3.PublicKey(ADMIN_WALLET),
+          lamports
+        })
+      );
+
+      const signed = await provider.signTransaction(transaction);
+      const signature = await connection.sendRawTransaction(signed.serialize());
+      await connection.confirmTransaction(signature, "confirmed");
+
+      return signature;
+    }
+
+    // CREAR TOKEN
+    async function createToken(name, symbol, supply) {
+      const provider = window.solana;
+
+      // Owner
+      const payer = provider.publicKey;
+
+      // Crear mint
+      const mint = await splToken.createMint(
+        connection,
+        payer,
+        payer,
+        null,
+        9
+      );
+
+      // Crear cuenta asociada
+      const ata = await splToken.getOrCreateAssociatedTokenAccount(
+        connection,
+        payer,
+        mint,
+        payer
+      );
+
+      // Mint supply
+      await splToken.mintTo(
+        connection,
+        payer,
+        mint,
+        ata.address,
+        payer,
+        supply * 1e9
+      );
+
+      return mint.toString();
+    }
+
+    async function startTokenCreation() {
+      const name = document.getElementById("tokenName").value.trim();
+      const symbol = document.getElementById("tokenSymbol").value.trim();
+      const supply = parseInt(document.getElementById("tokenSupply").value);
+
+      if (!name || !symbol || !supply) {
+        return showNotif("Completa todos los campos");
       }
-      document.getElementById("tokenModal").style.display = "flex";
-    });
 
-    // CERRAR MODAL
-    document.getElementById("closeTokenModal").addEventListener("click", () => {
-      document.getElementById("tokenModal").style.display = "none";
-    });
-
-    // FUNCION REAL PARA CREAR TOKEN
-    async function createTokenReal(name, symbol, decimals, supply) {
-      showNotif("⏳ Creando token en Solana...");
       try {
-        const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'));
-        const wallet = window.solana;
-        const publicKey = wallet.publicKey;
+        showNotif("💰 Procesando pago...");
+        await chargeUser();
 
-        const mint = await splToken.Token.createMint(
-          connection,
-          wallet,
-          publicKey,
-          null,
-          decimals,
-          splToken.TOKEN_PROGRAM_ID
-        );
+        showNotif("🛠 Creando token...");
+        const mintAddress = await createToken(name, symbol, supply);
 
-        const tokenAccount = await mint.getOrCreateAssociatedAccountInfo(publicKey);
-
-        await mint.mintTo(
-          tokenAccount.address,
-          publicKey,
-          [],
-          supply * (10 ** decimals)
-        );
-
-        showNotif(`✅ Token creado: ${symbol}`);
-        console.log("Token creado:", { name, symbol, decimals, supply, mintAddress: mint.publicKey.toBase58() });
+        showNotif("🎉 Token creado: " + mintAddress);
+        closeModal();
 
       } catch (err) {
         console.error(err);
-        showNotif("⚠️ Error creando token: " + (err.message || err));
+        showNotif("Error: " + err.message);
       }
     }
-
-    // BOTON DEL MODAL
-    document.getElementById("createTokenBtn").addEventListener("click", async () => {
-      const name = document.getElementById("tokenName").value.trim();
-      const symbol = document.getElementById("tokenSymbol").value.trim();
-      const decimals = parseInt(document.getElementById("tokenDecimals").value);
-      const supply = parseFloat(document.getElementById("tokenSupply").value);
-
-      if (!name || !symbol || isNaN(decimals) || isNaN(supply)) {
-        showNotif("⚠️ Completa todos los campos correctamente");
-        return;
-      }
-
-      document.getElementById("tokenModal").style.display = "none";
-      await createTokenReal(name, symbol, decimals, supply);
-    });
   </script>
 
 </body>
