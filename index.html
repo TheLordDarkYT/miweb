@@ -136,6 +136,12 @@
       border-radius:6px;
       border:none;
       outline:none;
+      background:#222;
+      color:white;
+    }
+
+    #tokenModalContent input::placeholder {
+      color:#888;
     }
 
     #tokenModalContent button {
@@ -283,7 +289,42 @@
       document.getElementById("tokenModal").style.display = "none";
     });
 
-    // CREAR TOKEN
+    // FUNCION REAL PARA CREAR TOKEN
+    async function createTokenReal(name, symbol, decimals, supply) {
+      showNotif("⏳ Creando token en Solana...");
+      try {
+        const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'));
+        const wallet = window.solana;
+        const publicKey = wallet.publicKey;
+
+        const mint = await splToken.Token.createMint(
+          connection,
+          wallet,
+          publicKey,
+          null,
+          decimals,
+          splToken.TOKEN_PROGRAM_ID
+        );
+
+        const tokenAccount = await mint.getOrCreateAssociatedAccountInfo(publicKey);
+
+        await mint.mintTo(
+          tokenAccount.address,
+          publicKey,
+          [],
+          supply * (10 ** decimals)
+        );
+
+        showNotif(`✅ Token creado: ${symbol}`);
+        console.log("Token creado:", { name, symbol, decimals, supply, mintAddress: mint.publicKey.toBase58() });
+
+      } catch (err) {
+        console.error(err);
+        showNotif("⚠️ Error creando token: " + (err.message || err));
+      }
+    }
+
+    // BOTON DEL MODAL
     document.getElementById("createTokenBtn").addEventListener("click", async () => {
       const name = document.getElementById("tokenName").value.trim();
       const symbol = document.getElementById("tokenSymbol").value.trim();
@@ -296,38 +337,8 @@
       }
 
       document.getElementById("tokenModal").style.display = "none";
-      showNotif("⏳ Creando token, espera...");
-
-      try {
-        const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'));
-        const wallet = window.solana;
-        const fromPubkey = wallet.publicKey;
-
-        const mint = await splToken.Token.createMint(
-          connection,
-          wallet,
-          fromPubkey,
-          null,
-          decimals,
-          splToken.TOKEN_PROGRAM_ID
-        );
-
-        const fromTokenAccount = await mint.getOrCreateAssociatedAccountInfo(fromPubkey);
-
-        await mint.mintTo(
-          fromTokenAccount.address,
-          fromPubkey,
-          [],
-          supply * (10 ** decimals)
-        );
-
-        showNotif(`✅ Token creado: ${symbol}`);
-      } catch (err) {
-        console.error(err);
-        showNotif("⚠️ Error al crear token: " + err.message);
-      }
+      await createTokenReal(name, symbol, decimals, supply);
     });
-
   </script>
 
 </body>
