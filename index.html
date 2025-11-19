@@ -1,124 +1,198 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Token Factory</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Token Factory</title>
 
-<style>
+  <style>
     body {
-        margin: 0;
-        padding: 0;
-        height: 100vh;
-        width: 100vw;
-        background: url("background.png") no-repeat center center fixed;
-        background-size: cover;
-        font-family: Arial, sans-serif;
-        color: white;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: white;
     }
 
-    /* Fondo oscuro transparente sobre la imagen */
-    .overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.55);
-        backdrop-filter: blur(2px);
+    header {
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(6px);
+      z-index: 100;
     }
 
-    /* Botón conectar arriba a la derecha */
-    #connectButton {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background-color: #e80000;
-        color: white;
-        padding: 12px 22px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: bold;
-        transition: 0.2s;
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+      color: #ff0000;
     }
 
-    #connectButton:hover {
-        background-color: #ff3333;
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      cursor: pointer;
+      font-size: 15px;
+      border-radius: 6px;
+      transition: 0.2s;
     }
 
-    .content {
-        position: relative;
-        z-index: 10;
-        text-align: center;
-        margin-top: 180px;
+    .btn-primary {
+      background: #ff0000;
+      color: white;
+    }
+    .btn-primary:hover { background: #cc0000; }
+
+    .btn-error {
+      background: #444;
+      color: #ff0000;
+      border: 1px solid #ff0000;
+    }
+    .btn-error:hover { background: #550000; }
+
+    .main {
+      margin-top: 150px;
+      text-align: center;
+      padding: 20px;
     }
 
-    .content h1 {
-        font-size: 50px;
-        font-weight: bold;
-        margin-bottom: 10px;
-        color: #ff3333;
-        text-shadow: 0 0 10px black;
+    h1 {
+      font-size: 50px;
+      color: #ff0000;
     }
 
-    .content p {
-        font-size: 22px;
-        color: #dddddd;
-        text-shadow: 0 0 6px black;
-    }
-</style>
-
-<script>
-    let walletConnected = false;
-
-    async function conectarWallet() {
-        if (!window.solana) {
-            alert("Por favor instala Phantom Wallet.");
-            return;
-        }
-
-        try {
-            const resp = await window.solana.connect();
-            walletConnected = true;
-
-            document.getElementById("connectButton").innerText = "Desconectar";
-
-            alert("Wallet conectada correctamente");
-        } catch (err) {
-            alert("Error al conectar la wallet");
-        }
+    p {
+      font-size: 20px;
+      margin-top: -10px;
+      color: #ccc;
     }
 
-    function desconectarWallet() {
-        if (window.solana && window.solana.disconnect) {
-            window.solana.disconnect();
-        }
-
-        walletConnected = false;
-        document.getElementById("connectButton").innerText = "Conectar Wallet";
-
-        alert("Wallet desconectada");
+    /* NOTIFICACIONES */
+    #notif {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #111;
+      border-left: 5px solid #ff0000;
+      padding: 15px 20px;
+      border-radius: 8px;
+      color: white;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: 0.3s ease;
+      z-index: 200;
+      font-size: 16px;
+      pointer-events: none;
     }
 
-    function toggleWallet() {
-        if (!walletConnected) {
-            conectarWallet();
-        } else {
-            desconectarWallet();
-        }
+    #notif.show {
+      opacity: 1;
+      transform: translateY(0);
     }
-</script>
-
+  </style>
 </head>
+
 <body>
 
-<div class="overlay"></div>
+  <!-- NOTIFICACIÓN -->
+  <div id="notif"></div>
 
-<button id="connectButton" onclick="toggleWallet()">Conectar Wallet</button>
+  <!-- HEADER -->
+  <header>
+    <div class="logo">TOKEN FACTORY</div>
 
-<div class="content">
+    <button 
+      id="walletBtn"
+      class="btn btn-primary"
+      onclick="connectWallet()"
+    >
+      Conectar wallet
+    </button>
+  </header>
+
+  <!-- CONTENIDO -->
+  <div class="main">
     <h1>Crea tokens en Solana</h1>
-    <p>Rápido, seguro y en mainnet</p>
-</div>
+    <p>Simple, rápido y en mainnet</p>
+
+    <button 
+      class="btn btn-primary"
+      onclick="location.href='/create'"
+      style="margin-top:30px"
+    >
+      Crear token
+    </button>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    let walletConnected = false;
+
+    function showNotif(msg) {
+      const n = document.getElementById('notif');
+      n.innerText = msg;
+      n.classList.add("show");
+      setTimeout(() => n.classList.remove("show"), 2500);
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const provider = window.solana;
+
+      if (provider && provider.isPhantom) {
+        try {
+          const resp = await provider.connect({ onlyIfTrusted: true });
+
+          if (resp.publicKey) {
+            walletConnected = true;
+            const btn = document.getElementById("walletBtn");
+            btn.innerText = "Desconectar";
+            btn.classList.remove("btn-primary");
+            btn.classList.add("btn-error");
+          }
+        } catch {}
+      }
+    });
+
+    async function connectWallet() {
+      const provider = window.solana;
+      const btn = document.getElementById("walletBtn");
+
+      try {
+        if (!provider || !provider.isPhantom) {
+          showNotif("Instala Phantom para continuar");
+          return;
+        }
+
+        if (!walletConnected) {
+          const resp = await provider.connect();
+          walletConnected = true;
+
+          showNotif("✅ La wallet se conectó correctamente");
+
+          btn.innerText = "Desconectar";
+          btn.classList.remove("btn-primary");
+          btn.classList.add("btn-error");
+
+        } else {
+          await provider.disconnect();
+          walletConnected = false;
+
+          showNotif("🔌 Wallet desconectada");
+
+          btn.innerText = "Conectar wallet";
+          btn.classList.remove("btn-error");
+          btn.classList.add("btn-primary");
+        }
+
+      } catch (err) {
+        showNotif("⚠️ Error: " + err.message);
+      }
+    }
+  </script>
 
 </body>
 </html>
