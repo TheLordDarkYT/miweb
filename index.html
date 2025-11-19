@@ -45,14 +45,20 @@
       background: #ff0000;
       color: white;
     }
-    .btn-primary:hover { background: #cc0000; }
+    .btn-primary:hover { 
+      background: #cc0000;
+      transform: scale(1.05);
+    }
 
     .btn-error {
       background: #444;
       color: #ff0000;
       border: 1px solid #ff0000;
     }
-    .btn-error:hover { background: #550000; }
+    .btn-error:hover { 
+      background: #770000;
+      transform: scale(1.05);
+    }
 
     .main {
       margin-top: 150px;
@@ -131,6 +137,7 @@
   <!-- SCRIPT -->
   <script>
     let walletConnected = false;
+    let walletAddress = "";
 
     function showNotif(msg) {
       const n = document.getElementById('notif');
@@ -139,6 +146,7 @@
       setTimeout(() => n.classList.remove("show"), 2500);
     }
 
+    // Al cargar la página, revisa si Phantom ya está conectada
     document.addEventListener("DOMContentLoaded", async () => {
       const provider = window.solana;
 
@@ -148,48 +156,57 @@
 
           if (resp.publicKey) {
             walletConnected = true;
-            const btn = document.getElementById("walletBtn");
-            btn.innerText = "Desconectar";
-            btn.classList.remove("btn-primary");
-            btn.classList.add("btn-error");
+            walletAddress = resp.publicKey.toString();
+            updateWalletButton();
+            showNotif("✅ Wallet conectada automáticamente");
           }
-        } catch {}
+        } catch (err) {
+          console.warn("No hay conexión previa:", err);
+        }
       }
     });
 
+    // Actualiza el botón según el estado
+    function updateWalletButton() {
+      const btn = document.getElementById("walletBtn");
+      if (walletConnected) {
+        const shortAddr = walletAddress.slice(0,6) + "..." + walletAddress.slice(-4);
+        btn.innerText = shortAddr;
+        btn.classList.remove("btn-primary");
+        btn.classList.add("btn-error");
+      } else {
+        btn.innerText = "Conectar wallet";
+        btn.classList.remove("btn-error");
+        btn.classList.add("btn-primary");
+      }
+    }
+
     async function connectWallet() {
       const provider = window.solana;
+      if (!provider || !provider.isPhantom) {
+        showNotif("Instala Phantom para continuar");
+        return;
+      }
+
       const btn = document.getElementById("walletBtn");
 
       try {
-        if (!provider || !provider.isPhantom) {
-          showNotif("Instala Phantom para continuar");
-          return;
-        }
-
         if (!walletConnected) {
           const resp = await provider.connect();
           walletConnected = true;
-
+          walletAddress = resp.publicKey.toString();
+          updateWalletButton();
           showNotif("✅ La wallet se conectó correctamente");
-
-          btn.innerText = "Desconectar";
-          btn.classList.remove("btn-primary");
-          btn.classList.add("btn-error");
-
         } else {
           await provider.disconnect();
           walletConnected = false;
-
+          walletAddress = "";
+          updateWalletButton();
           showNotif("🔌 Wallet desconectada");
-
-          btn.innerText = "Conectar wallet";
-          btn.classList.remove("btn-error");
-          btn.classList.add("btn-primary");
         }
-
       } catch (err) {
-        showNotif("⚠️ Error: " + err.message);
+        console.error(err);
+        showNotif("⚠️ Error: " + (err.message || err));
       }
     }
   </script>
