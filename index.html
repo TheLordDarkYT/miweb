@@ -99,6 +99,50 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    /* MODAL CREAR TOKEN */
+    #tokenModal {
+      display: none;
+      position: fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background:rgba(0,0,0,0.85);
+      backdrop-filter: blur(6px);
+      justify-content:center;
+      align-items:center;
+      z-index:300;
+    }
+
+    #tokenModalContent {
+      background:#111;
+      padding:30px;
+      border-radius:10px;
+      width:350px;
+      text-align:center;
+      position:relative;
+    }
+
+    #tokenModalContent h2 {
+      color:#ff0000;
+      margin-bottom:20px;
+    }
+
+    #tokenModalContent input {
+      width:100%;
+      padding:10px;
+      margin-bottom:10px;
+      border-radius:6px;
+      border:none;
+      outline:none;
+    }
+
+    #tokenModalContent button {
+      width:100%;
+      margin-top:10px;
+    }
+
   </style>
 </head>
 
@@ -126,13 +170,30 @@
     <p>Simple, rápido y en mainnet</p>
 
     <button 
+      id="openCreateToken"
       class="btn btn-primary"
-      onclick="location.href='/create'"
       style="margin-top:30px"
     >
       Crear token
     </button>
   </div>
+
+  <!-- MODAL CREAR TOKEN -->
+  <div id="tokenModal">
+    <div id="tokenModalContent">
+      <h2>Crear Token</h2>
+      <input id="tokenName" placeholder="Nombre del token" />
+      <input id="tokenSymbol" placeholder="Símbolo (ej: TKN)" />
+      <input id="tokenDecimals" type="number" placeholder="Decimales (ej: 9)" />
+      <input id="tokenSupply" type="number" placeholder="Cantidad total" />
+      <button id="createTokenBtn" class="btn btn-primary">Crear Token</button>
+      <button id="closeTokenModal" class="btn btn-error">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- LIBRERIAS SOLANA -->
+  <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@latest/lib/index.iife.min.js"></script>
 
   <!-- SCRIPT -->
   <script>
@@ -188,8 +249,6 @@
         return;
       }
 
-      const btn = document.getElementById("walletBtn");
-
       try {
         if (!walletConnected) {
           const resp = await provider.connect();
@@ -209,6 +268,66 @@
         showNotif("⚠️ Error: " + (err.message || err));
       }
     }
+
+    // ABRIR MODAL
+    document.getElementById("openCreateToken").addEventListener("click", () => {
+      if (!walletConnected) {
+        showNotif("⚠️ Conecta tu wallet primero");
+        return;
+      }
+      document.getElementById("tokenModal").style.display = "flex";
+    });
+
+    // CERRAR MODAL
+    document.getElementById("closeTokenModal").addEventListener("click", () => {
+      document.getElementById("tokenModal").style.display = "none";
+    });
+
+    // CREAR TOKEN
+    document.getElementById("createTokenBtn").addEventListener("click", async () => {
+      const name = document.getElementById("tokenName").value.trim();
+      const symbol = document.getElementById("tokenSymbol").value.trim();
+      const decimals = parseInt(document.getElementById("tokenDecimals").value);
+      const supply = parseFloat(document.getElementById("tokenSupply").value);
+
+      if (!name || !symbol || isNaN(decimals) || isNaN(supply)) {
+        showNotif("⚠️ Completa todos los campos correctamente");
+        return;
+      }
+
+      document.getElementById("tokenModal").style.display = "none";
+      showNotif("⏳ Creando token, espera...");
+
+      try {
+        const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'));
+        const wallet = window.solana;
+        const fromPubkey = wallet.publicKey;
+
+        const mint = await splToken.Token.createMint(
+          connection,
+          wallet,
+          fromPubkey,
+          null,
+          decimals,
+          splToken.TOKEN_PROGRAM_ID
+        );
+
+        const fromTokenAccount = await mint.getOrCreateAssociatedAccountInfo(fromPubkey);
+
+        await mint.mintTo(
+          fromTokenAccount.address,
+          fromPubkey,
+          [],
+          supply * (10 ** decimals)
+        );
+
+        showNotif(`✅ Token creado: ${symbol}`);
+      } catch (err) {
+        console.error(err);
+        showNotif("⚠️ Error al crear token: " + err.message);
+      }
+    });
+
   </script>
 
 </body>
