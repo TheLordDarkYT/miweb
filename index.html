@@ -4,355 +4,112 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Token Factory</title>
-
+  <script src="https://unpkg.com/@solana/web3.js@1.87.0/lib/index.iife.js"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #000;
-      color: white;
-    }
-
-    header {
-      width: 100%;
-      padding: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: fixed;
-      top: 0;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(6px);
-      z-index: 100;
-    }
-
-    .logo {
-      font-size: 28px;
-      font-weight: bold;
-      color: #ff0000;
-    }
-
-    .btn {
-      padding: 10px 16px;
-      border: none;
-      cursor: pointer;
-      font-size: 15px;
-      border-radius: 6px;
-      transition: 0.2s;
-    }
-
-    .btn-primary {
-      background: #ff0000;
-      color: white;
-    }
-    .btn-primary:hover { 
-      background: #cc0000;
-      transform: scale(1.05);
-    }
-
-    .btn-error {
-      background: #444;
-      color: #ff0000;
-      border: 1px solid #ff0000;
-    }
-    .btn-error:hover { 
-      background: #770000;
-      transform: scale(1.05);
-    }
-
-    .main {
-      margin-top: 150px;
-      text-align: center;
-      padding: 20px;
-    }
-
-    h1 {
-      font-size: 50px;
-      color: #ff0000;
-    }
-
-    p {
-      font-size: 20px;
-      margin-top: -10px;
-      color: #ccc;
-    }
-
-    #notif {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #111;
-      border-left: 5px solid #ff0000;
-      padding: 15px 20px;
-      border-radius: 8px;
-      color: white;
-      opacity: 0;
-      transform: translateY(-20px);
-      transition: 0.3s ease;
-      z-index: 200;
-      font-size: 16px;
-      pointer-events: none;
-    }
-    #notif.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* MODAL */
-    #modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(4px);
-      justify-content: center;
-      align-items: center;
-      z-index: 300;
-    }
-    #modalContent {
-      background: #111;
-      padding: 25px;
-      border-radius: 10px;
-      width: 350px;
-      text-align: left;
-      border: 1px solid #ff0000;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 6px;
-      border: 1px solid #444;
-      background: #222;
-      color: white;
-    }
+    body { margin:0; font-family: Arial, sans-serif; background:#000; color:#fff; }
+    header { padding:20px; text-align:center; background:#111; }
+    h1 { margin:0; }
+    main { max-width:600px; margin:40px auto; padding:20px; background:#111; border-radius:10px; }
+    label { display:block; margin-top:15px; font-weight:bold; }
+    input { width:100%; padding:10px; border-radius:8px; border:none; margin-top:5px; }
+    button { margin-top:20px; width:100%; padding:12px; border:none; border-radius:8px; background:#4caf50; color:#fff; font-size:16px; cursor:pointer; }
+    button:hover { background:#45a049; }
+    #log { margin-top:20px; padding:10px; background:#000; border-radius:8px; min-height:120px; white-space:pre-line; }
   </style>
-
-  <!-- Solana Web3 -->
-  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
-  <script src="https://unpkg.com/@solana/spl-token@latest"></script>
 </head>
-
 <body>
-
-  <!-- NOTIFICACIÓN -->
-  <div id="notif"></div>
-
-  <!-- MODAL -->
-  <div id="modal">
-    <div id="modalContent">
-      <h2>Crear Token</h2>
-
-      <label>Nombre del token</label>
-      <input id="tokenName" placeholder="Ej: RoadCoin" />
-
-      <label>Símbolo</label>
-      <input id="tokenSymbol" placeholder="Ej: RDC" />
-
-      <label>Supply</label>
-      <input id="tokenSupply" type="number" placeholder="Ej: 1000000" />
-
-      <button class="btn btn-primary" style="margin-top:15px;width:100%;" onclick="startTokenCreation()">
-        Pagar 0.058 SOL y crear token
-      </button>
-
-      <button class="btn btn-error" style="margin-top:10px;width:100%;" onclick="closeModal()">
-        Cancelar
-      </button>
-    </div>
-  </div>
-
-  <!-- HEADER -->
   <header>
-    <div class="logo">TOKEN FACTORY</div>
-
-    <button 
-      id="walletBtn"
-      class="btn btn-primary"
-      onclick="connectWallet()"
-    >
-      Conectar wallet
-    </button>
+    <h1>Token Factory - Crear Token en Solana</h1>
   </header>
 
-  <!-- CONTENIDO -->
-  <div class="main">
-    <h1>Crea tokens en Solana</h1>
-    <p>Simple, rápido y en mainnet</p>
+  <main>
+    <label>Nombre del Token</label>
+    <input id="tokenName" type="text" placeholder="Ej: RoadCoin" />
 
-    <button 
-      class="btn btn-primary"
-      onclick="openModal()"
-      style="margin-top:30px"
-    >
-      Crear token
-    </button>
-  </div>
+    <label>Símbolo</label>
+    <input id="tokenSymbol" type="text" placeholder="Ej: RDC" />
 
-  <!-- SCRIPT -->
-  <script>
-    let walletConnected = false;
-    let walletAddress = "";
-    const TOKEN_CREATION_PRICE = 0.058; // SOL
-    const ADMIN_WALLET = "H1mn89WUyB55iGWFhCFrL5PP7KjniG5JT3beCsMwVHHv";
+    <label>Decimales</label>
+    <input id="tokenDecimals" type="number" min="0" max="9" value="9" />
 
-    const connection = new solanaWeb3.Connection(
-      "https://api.mainnet-beta.solana.com",
-      "confirmed"
+    <label>Suministro Total</label>
+    <input id="tokenSupply" type="number" placeholder="Ej: 1000000" />
+
+    <button onclick="crearToken()">Crear Token</button>
+
+    <div id="log"></div>
+  </main>
+
+<script>
+const { Connection, Keypair, PublicKey, SystemProgram, Transaction } = solanaWeb3;
+
+function log(msg){
+  document.getElementById("log").innerText += `\n${msg}`;
+}
+
+async function crearToken(){
+  document.getElementById("log").innerText = "";
+  log("Conectando a Phantom...");
+
+  if(!window.solana){
+    log("Phantom no está instalado.");
+    return;
+  }
+
+  await window.solana.connect();
+  const wallet = window.solana;
+  const publicKey = wallet.publicKey;
+
+  log("Wallet conectada: " + publicKey.toString());
+
+  const connection = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
+
+  const name = document.getElementById("tokenName").value;
+  const symbol = document.getElementById("tokenSymbol").value;
+  const decimals = parseInt(document.getElementById("tokenDecimals").value);
+  const supply = parseInt(document.getElementById("tokenSupply").value);
+
+  if(!name || !symbol || !supply){
+    log("Por favor complete todos los campos.");
+    return;
+  }
+
+  log("Creando token...");
+
+  try{
+    const mintAccount = Keypair.generate();
+
+    const lamportsForMint = await connection.getMinimumBalanceForRentExemption(82);
+
+    const createMintTx = new Transaction().add(
+      SystemProgram.createAccount({
+        fromPubkey: publicKey,
+        newAccountPubkey: mintAccount.publicKey,
+        space: 82,
+        lamports: lamportsForMint,
+        programId: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
+      })
     );
 
-    function showNotif(msg) {
-      const n = document.getElementById('notif');
-      n.innerText = msg;
-      n.classList.add("show");
-      setTimeout(() => n.classList.remove("show"), 2500);
-    }
+    createMintTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+    createMintTx.feePayer = publicKey;
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      const provider = window.solana;
-      if (provider && provider.isPhantom) {
-        try {
-          const resp = await provider.connect({ onlyIfTrusted: true });
-          if (resp.publicKey) {
-            walletConnected = true;
-            walletAddress = resp.publicKey.toString();
-            updateWalletButton();
-            showNotif("✅ Wallet conectada automáticamente");
-          }
-        } catch {}
-      }
-    });
+    const signed = await wallet.signTransaction(createMintTx);
+    signed.partialSign(mintAccount);
 
-    function updateWalletButton() {
-      const btn = document.getElementById("walletBtn");
-      if (walletConnected) {
-        const shortAddr = walletAddress.slice(0,6) + "..." + walletAddress.slice(-4);
-        btn.innerText = shortAddr;
-        btn.classList.remove("btn-primary");
-        btn.classList.add("btn-error");
-      } else {
-        btn.innerText = "Conectar wallet";
-        btn.classList.remove("btn-error");
-        btn.classList.add("btn-primary");
-      }
-    }
+    const txid = await connection.sendRawTransaction(signed.serialize());
 
-    async function connectWallet() {
-      const provider = window.solana;
-      if (!provider || !provider.isPhantom) {
-        showNotif("Instala Phantom para continuar");
-        return;
-      }
+    await connection.confirmTransaction(txid);
 
-      try {
-        if (!walletConnected) {
-          const resp = await provider.connect();
-          walletConnected = true;
-          walletAddress = resp.publicKey.toString();
-          updateWalletButton();
-          showNotif("🟢 Wallet conectada");
-        } else {
-          await provider.disconnect();
-          walletConnected = false;
-          walletAddress = "";
-          updateWalletButton();
-          showNotif("🔌 Wallet desconectada");
-        }
-      } catch (err) {
-        showNotif("⚠️ Error: " + (err.message || err));
-      }
-    }
+    log("Token creado con éxito!");
+    log("Mint Address: " + mintAccount.publicKey.toString());
 
-    function openModal() {
-      if (!walletConnected) return showNotif("Conecta tu wallet primero");
-      document.getElementById("modal").style.display = "flex";
-    }
-    function closeModal() {
-      document.getElementById("modal").style.display = "none";
-    }
+    log("\n*** IMPORTANTE ***\nEste es un ejemplo mínimo. Para un token funcional necesitas usar SPL Token Program v2, asociar cuenta ATA y mintear supply.");
 
-    // COBRAR AL USUARIO
-    async function chargeUser() {
-      const provider = window.solana;
-      const lamports = TOKEN_CREATION_PRICE * 1e9;
-
-      const transaction = new solanaWeb3.Transaction().add(
-        solanaWeb3.SystemProgram.transfer({
-          fromPubkey: provider.publicKey,
-          toPubkey: new solanaWeb3.PublicKey(ADMIN_WALLET),
-          lamports
-        })
-      );
-
-      const signed = await provider.signTransaction(transaction);
-      const signature = await connection.sendRawTransaction(signed.serialize());
-      await connection.confirmTransaction(signature, "confirmed");
-
-      return signature;
-    }
-
-    // CREAR TOKEN
-    async function createToken(name, symbol, supply) {
-      const provider = window.solana;
-
-      // Owner
-      const payer = provider.publicKey;
-
-      // Crear mint
-      const mint = await splToken.createMint(
-        connection,
-        payer,
-        payer,
-        null,
-        9
-      );
-
-      // Crear cuenta asociada
-      const ata = await splToken.getOrCreateAssociatedTokenAccount(
-        connection,
-        payer,
-        mint,
-        payer
-      );
-
-      // Mint supply
-      await splToken.mintTo(
-        connection,
-        payer,
-        mint,
-        ata.address,
-        payer,
-        supply * 1e9
-      );
-
-      return mint.toString();
-    }
-
-    async function startTokenCreation() {
-      const name = document.getElementById("tokenName").value.trim();
-      const symbol = document.getElementById("tokenSymbol").value.trim();
-      const supply = parseInt(document.getElementById("tokenSupply").value);
-
-      if (!name || !symbol || !supply) {
-        return showNotif("Completa todos los campos");
-      }
-
-      try {
-        showNotif("💰 Procesando pago...");
-        await chargeUser();
-
-        showNotif("🛠 Creando token...");
-        const mintAddress = await createToken(name, symbol, supply);
-
-        showNotif("🎉 Token creado: " + mintAddress);
-        closeModal();
-
-      } catch (err) {
-        console.error(err);
-        showNotif("Error: " + err.message);
-      }
-    }
-  </script>
-
+  }catch(err){
+    log("ERROR: " + err);
+  }
+}
+</script>
 </body>
 </html>
