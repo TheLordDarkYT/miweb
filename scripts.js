@@ -19,14 +19,18 @@ async function crearToken() {
 
     // Conectar Phantom
     await provider.connect();
-    const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"));
+  
+    const connection = new solanaWeb3.Connection(
+        solanaWeb3.clusterApiUrl("mainnet-beta"),
+        "confirmed"
+    );
 
     const publicKey = provider.publicKey;
 
     // Datos del formulario
     const nombre = document.getElementById("tokenName").value.trim();
     const simbolo = document.getElementById("tokenSymbol").value.trim();
-    const cantidadTotal = parseInt(document.getElementById("tokenAmount").value.trim());
+    const cantidadTotal = parseInt(document.getElementById("tokenSupply").value.trim());
     const decimales = 9;
 
     if (!nombre || !simbolo || !cantidadTotal) {
@@ -35,16 +39,16 @@ async function crearToken() {
     }
 
     try {
-        // Crear Mint (token)
+        // Crear Mint
         const mint = await splToken.createMint(
             connection,
-            provider,          // pagador
-            publicKey,         // autoridad de creación
-            publicKey,         // autoridad de congelación
+            provider,
+            publicKey,
+            publicKey,
             decimales
         );
 
-        // Crear cuenta asociada para ti
+        // Cuenta asociada
         const userTokenAccount = await splToken.getOrCreateAssociatedTokenAccount(
             connection,
             provider,
@@ -52,7 +56,7 @@ async function crearToken() {
             publicKey
         );
 
-        // Mint (crear la cantidad total)
+        // Mint tokens
         await splToken.mintTo(
             connection,
             provider,
@@ -62,10 +66,10 @@ async function crearToken() {
             cantidadTotal * (10 ** decimales)
         );
 
-        alert(`TOKEN CREADO EXITOSAMENTE ✔\nMint Address: ${mint.toBase58()}`);
+        alert(`TOKEN CREADO ✔\nMint Address:\n${mint.toBase58()}`);
 
     } catch (error) {
         console.error(error);
-        alert("Ocurrió un error creando el token: " + error.message);
+        alert("Error creando el token: " + error.message);
     }
 }
