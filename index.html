@@ -123,21 +123,11 @@
         <p id="msg" style="margin-top:15px; color:red; font-size:16px;"></p>
     </div>
 
-    <script>
-        const form = document.getElementById("createTokenForm");
-        const msg = document.getElementById("msg");
-
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-
-            msg.textContent = "⏳ Creando tu token...";
-
-            setTimeout(() => {
-                msg.textContent = "✅ Token creado exitosamente (simulación)";
-                msg.style.color = "lime";
-            }, 1500);
-        });
-    </script>
+    <!-- Scripts corregidos -->
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="https://unpkg.com/@solana/spl-token@latest/dist/browser/index.iife.js"></script>
+    <script src="/script.js"></script>
 
 </body>
 </html>
+
