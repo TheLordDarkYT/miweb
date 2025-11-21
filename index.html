@@ -4,25 +4,34 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Token Factory</title>
+
+  <!-- Solana web3 -->
   <script src="https://unpkg.com/@solana/web3.js@1.87.0/lib/index.iife.js"></script>
-  <style>
-    body { margin:0; font-family: Arial, sans-serif; background:#000; color:#fff; }
-    header { padding:20px; text-align:center; background:#111; }
-    h1 { margin:0; }
-    main { max-width:600px; margin:40px auto; padding:20px; background:#111; border-radius:10px; }
-    label { display:block; margin-top:15px; font-weight:bold; }
-    input { width:100%; padding:10px; border-radius:8px; border:none; margin-top:5px; }
-    button { margin-top:20px; width:100%; padding:12px; border:none; border-radius:8px; background:#4caf50; color:#fff; font-size:16px; cursor:pointer; }
-    button:hover { background:#45a049; }
-    #log { margin-top:20px; padding:10px; background:#000; border-radius:8px; min-height:120px; white-space:pre-line; }
-  </style>
+
+  <!-- Tu CSS externo -->
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
+
+  <!-- HEADER -->
   <header>
-    <h1>Token Factory - Crear Token en Solana</h1>
+    <div class="logo">TOKEN FACTORY</div>
+    <nav>
+      <a href="/">Inicio</a>
+      <a href="/create">Crear Token</a>
+    </nav>
   </header>
 
-  <main>
+  <!-- HERO -->
+  <section class="hero">
+    <h1>Crea tokens en Solana</h1>
+    <p>Simple, rápido y directamente en mainnet</p>
+    <a href="#form" class="btn">Crear Token</a>
+  </section>
+
+  <!-- FORMULARIO -->
+  <main id="form" style="max-width:600px; margin:40px auto; padding:20px; backdrop-filter: blur(4px); background: rgba(0,0,0,0.55); border:1px solid red; border-radius:10px;">
     <label>Nombre del Token</label>
     <input id="tokenName" type="text" placeholder="Ej: RoadCoin" />
 
@@ -37,8 +46,13 @@
 
     <button onclick="crearToken()">Crear Token</button>
 
-    <div id="log"></div>
+    <div id="log" style="background:#000; margin-top:20px; padding:10px; border-radius:8px; min-height:120px; white-space:pre-line;"></div>
   </main>
+
+  <footer>
+    © 2025 Token Factory - Powered on Solana
+  </footer>
+
 
 <script>
 const { Connection, Keypair, PublicKey, SystemProgram, Transaction } = solanaWeb3;
@@ -103,13 +117,13 @@ async function crearToken(){
 
     log("Token creado con éxito!");
     log("Mint Address: " + mintAccount.publicKey.toString());
-
-    log("\n*** IMPORTANTE ***\nEste es un ejemplo mínimo. Para un token funcional necesitas usar SPL Token Program v2, asociar cuenta ATA y mintear supply.");
+    log("\n*** IMPORTANTE ***\nEste es un ejemplo mínimo. Para un token funcional necesitas usar SPL Token v2, ATA y minteo.");
 
   }catch(err){
     log("ERROR: " + err);
   }
 }
 </script>
+
 </body>
 </html>
