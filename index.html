@@ -5,33 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Token Factory</title>
 
-  <!-- Solana web3 -->
+  <!-- Solana Web3 -->
   <script src="https://unpkg.com/@solana/web3.js@1.87.0/lib/index.iife.js"></script>
 
-  <!-- Tu CSS externo -->
+  <!-- Tu CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
-  <!-- HEADER -->
-  <header>
-    <div class="logo">TOKEN FACTORY</div>
-    <nav>
-      <a href="/">Inicio</a>
-      <a href="/create">Crear Token</a>
-    </nav>
-  </header>
+<header>
+  <div class="logo">TOKEN FACTORY</div>
+  <nav>
+    <a href="index.html">Inicio</a>
+    <a href="#crear">Crear Token</a>
+  </nav>
+</header>
 
-  <!-- HERO -->
-  <section class="hero">
-    <h1>Crea tokens en Solana</h1>
-    <p>Simple, rápido y directamente en mainnet</p>
-    <a href="#form" class="btn">Crear Token</a>
-  </section>
+<!-- HERO -->
+<section class="hero">
+  <h1>Crea tokens en Solana</h1>
+  <p>Simple, rápido y en mainnet</p>
+  <a class="btn" href="#crear">Crear token</a>
+</section>
 
-  <!-- FORMULARIO -->
-  <main id="form" style="max-width:600px; margin:40px auto; padding:20px; backdrop-filter: blur(4px); background: rgba(0,0,0,0.55); border:1px solid red; border-radius:10px;">
+<!-- FORMULARIO -->
+<main id="crear">
+  <div class="form-box">
     <label>Nombre del Token</label>
     <input id="tokenName" type="text" placeholder="Ej: RoadCoin" />
 
@@ -46,13 +46,13 @@
 
     <button onclick="crearToken()">Crear Token</button>
 
-    <div id="log" style="background:#000; margin-top:20px; padding:10px; border-radius:8px; min-height:120px; white-space:pre-line;"></div>
-  </main>
+    <div id="log" class="log-box"></div>
+  </div>
+</main>
 
-  <footer>
-    © 2025 Token Factory - Powered on Solana
-  </footer>
-
+<footer>
+  © 2025 Token Factory - Powered on Solana
+</footer>
 
 <script>
 const { Connection, Keypair, PublicKey, SystemProgram, Transaction } = solanaWeb3;
@@ -117,7 +117,8 @@ async function crearToken(){
 
     log("Token creado con éxito!");
     log("Mint Address: " + mintAccount.publicKey.toString());
-    log("\n*** IMPORTANTE ***\nEste es un ejemplo mínimo. Para un token funcional necesitas usar SPL Token v2, ATA y minteo.");
+
+    log("\n*** IMPORTANTE ***\nEste es un ejemplo mínimo. Para un token funcional necesitas usar SPL Token Program v2, asociar cuenta ATA y mintear supply.");
 
   }catch(err){
     log("ERROR: " + err);
