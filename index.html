@@ -1,129 +1,143 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Token Factory</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Token – Token Factory</title>
 
-  <link rel="stylesheet" href="style.css">
+    <!-- Cargar estilos globales -->
+    <link rel="stylesheet" href="/style.css">
 
-  <script src="https://unpkg.com/@solana/web3.js@1.87.0/lib/index.iife.js"></script>
+    <style>
+        /* Ajustes específicos de esta página */
+
+        .create-container {
+            max-width: 600px;
+            margin: 120px auto;
+            padding: 30px;
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid red;
+            box-shadow: 0 0 20px red;
+            border-radius: 12px;
+            text-align: center;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        .create-container h2 {
+            color: red;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            font-size: 14px;
+            margin-top: 12px;
+            color: white;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            border: 1px solid red;
+            background: black;
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            box-shadow: 0 0 8px red;
+        }
+
+        .create-btn {
+            margin-top: 25px;
+            width: 100%;
+            padding: 15px;
+            background: red;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .create-btn:hover {
+            background: darkred;
+            box-shadow: 0 0 10px red;
+        }
+
+        /* Animación suave */
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(20px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        /* Para que el fondo gris desaparezca */
+        body {
+            background: black !important;
+        }
+    </style>
 </head>
-
 <body>
 
-<header>
-  <div class="logo">TOKEN FACTORY</div>
-  <nav>
-    <a href="index.html">Inicio</a>
-    <a href="#crear">Crear Token</a>
-  </nav>
-</header>
+    <!-- Navbar igual al index -->
+    <header class="navbar">
+        <div class="logo">TOKEN FACTORY</div>
+        <nav>
+            <a href="/">Inicio</a>
+            <a href="/create">Crear Token</a>
+            <a href="/about">Sobre Nosotros</a>
+        </nav>
+    </header>
 
-<!-- HERO -->
-<section class="hero">
-  <h1>Crea tokens en Solana</h1>
-  <p>Simple, rápido y en mainnet</p>
-  <a class="btn" href="#crear">Crear token</a>
-</section>
+    <div class="create-container">
+        <h2>Crear Nuevo Token</h2>
 
-<!-- FORMULARIO -->
-<main id="crear">
-  <div class="form-box">
-    <label>Nombre del Token</label>
-    <input id="tokenName" type="text" placeholder="Ej: RoadCoin" />
+        <form id="createTokenForm">
+            <label>Nombre del Token</label>
+            <input type="text" id="tokenName" placeholder="Ej: RoadCoin" required>
 
-    <label>Símbolo</label>
-    <input id="tokenSymbol" type="text" placeholder="Ej: RDC" />
+            <label>Simbolo (Ticker)</label>
+            <input type="text" id="tokenSymbol" placeholder="Ej: RDC" maxlength="8" required>
 
-    <label>Decimales</label>
-    <input id="tokenDecimals" type="number" min="0" max="9" value="9" />
+            <label>Cantidad Total</label>
+            <input type="number" id="tokenSupply" placeholder="Ej: 1000000" required>
 
-    <label>Suministro Total</label>
-    <input id="tokenSupply" type="number" placeholder="Ej: 1000000" />
+            <label>Blockchain</label>
+            <select id="blockchain">
+                <option value="solana">Solana</option>
+                <option value="eth">Ethereum</option>
+                <option value="bsc">Binance Smart Chain</option>
+            </select>
 
-    <button onclick="crearToken()">Crear Token</button>
+            <button class="create-btn" type="submit">Crear Token</button>
+        </form>
 
-    <div id="log" class="log-box"></div>
-  </div>
-</main>
+        <p id="msg" style="margin-top:15px; color:red; font-size:16px;"></p>
+    </div>
 
-<footer>
-  © 2025 Token Factory - Powered on Solana
-</footer>
+    <script>
+        const form = document.getElementById("createTokenForm");
+        const msg = document.getElementById("msg");
 
-<script>
-const { Connection, Keypair, PublicKey, SystemProgram, Transaction } = solanaWeb3;
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
 
-function log(msg){
-  document.getElementById("log").innerText += `\n${msg}`;
-}
+            msg.textContent = "⏳ Creando tu token...";
 
-async function crearToken(){
-  document.getElementById("log").innerText = "";
-  log("Conectando a Phantom...");
-
-  if(!window.solana){
-    log("Phantom no está instalado.");
-    return;
-  }
-
-  await window.solana.connect();
-  const wallet = window.solana;
-  const publicKey = wallet.publicKey;
-
-  log("Wallet conectada: " + publicKey.toString());
-
-  const connection = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
-
-  const name = document.getElementById("tokenName").value;
-  const symbol = document.getElementById("tokenSymbol").value;
-  const decimals = parseInt(document.getElementById("tokenDecimals").value);
-  const supply = parseInt(document.getElementById("tokenSupply").value);
-
-  if(!name || !symbol || !supply){
-    log("Por favor complete todos los campos.");
-    return;
-  }
-
-  log("Creando token...");
-
-  try{
-    const mintAccount = Keypair.generate();
-
-    const lamportsForMint = await connection.getMinimumBalanceForRentExemption(82);
-
-    const createMintTx = new Transaction().add(
-      SystemProgram.createAccount({
-        fromPubkey: publicKey,
-        newAccountPubkey: mintAccount.publicKey,
-        space: 82,
-        lamports: lamportsForMint,
-        programId: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
-      })
-    );
-
-    createMintTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-    createMintTx.feePayer = publicKey;
-
-    const signed = await wallet.signTransaction(createMintTx);
-    signed.partialSign(mintAccount);
-
-    const txid = await connection.sendRawTransaction(signed.serialize());
-
-    await connection.confirmTransaction(txid);
-
-    log("Token creado con éxito!");
-    log("Mint Address: " + mintAccount.publicKey.toString());
-
-    log("\n*** IMPORTANTE ***\nEste es un ejemplo mínimo. Para un token funcional necesitas usar SPL Token Program v2, asociar cuenta ATA y mintear supply.");
-
-  }catch(err){
-    log("ERROR: " + err);
-  }
-}
-</script>
+            setTimeout(() => {
+                msg.textContent = "✅ Token creado exitosamente (simulación)";
+                msg.style.color = "lime";
+            }, 1500);
+        });
+    </script>
 
 </body>
 </html>
-
