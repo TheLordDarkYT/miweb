@@ -1,120 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solana Token Factory - Create Your Own Crypto</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.73.0/lib/index.iife.min.js"></script>
-    <script src="https://unpkg.com/@solana/spl-token@0.3.8/lib/index.iife.js"></script>
+    <title>Orion Tools - Token Creator</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+    <script src="https://unpkg.com/@metaplex-foundation/js@latest"></script>
+    <script src="app.js" defer></script>
 </head>
-<body class="bg-gradient-to-br from-purple-900 to-indigo-900 min-h-screen text-white">
-    <custom-navbar></custom-navbar>
-    <div class="absolute top-4 right-4">
-      <language-selector></language-selector>
-    </div>
-<main class="container mx-auto px-4 py-12">
-        <div class="max-w-3xl mx-auto bg-gray-800 bg-opacity-50 backdrop-blur-lg rounded-2xl p-8 shadow-2xl">
-            <div class="text-center mb-10">
-                <h1 class="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
-                    Create Your Solana Token
-                </h1>
-                <p class="text-lg text-gray-300">
-                    Launch your own cryptocurrency on Solana Mainnet in minutes
-                </p>
-</div>
-
-            <div class="space-y-6">
-                <div class="form-group">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Token Name</label>
-                    <input type="text" id="tokenName" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="My Awesome Token">
-                </div>
-
-                <div class="form-group">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Token Symbol</label>
-                    <input type="text" id="tokenSymbol" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="MAT" maxlength="5">
-                </div>
-
-                <div class="form-group">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Total Supply</label>
-                    <input type="number" id="tokenSupply" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="1000000">
-                </div>
-                <div class="form-group">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Decimals</label>
-                    <select id="tokenDecimals" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                        <option value="9">9 (Recommended)</option>
-                        <option value="6">6</option>
-                        <option value="2">2</option>
-                        <option value="0">0</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Token Image (Optional)</label>
-                    <div class="flex items-center space-x-4">
-                        <div class="relative w-16 h-16 rounded-lg bg-gray-700 overflow-hidden">
-                            <img id="tokenImagePreview" src="" alt="Token preview" class="w-full h-full object-cover hidden">
-                            <div id="imagePlaceholder" class="w-full h-full flex items-center justify-center text-gray-400">
-                                <i data-feather="image" class="w-6 h-6"></i>
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <input type="file" id="tokenImage" accept="image/*" class="hidden">
-                            <button type="button" id="uploadImageBtn" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors">
-                                Upload Image
-                            </button>
-                            <p class="text-xs text-gray-400 mt-1">Recommended: 512x512 PNG</p>
-                        </div>
-                    </div>
-                </div>
-<div class="pt-4">
-                    <button id="createTokenBtn" class="w-full py-4 px-6 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg flex items-center justify-center">
-                        <i data-feather="zap" class="mr-2"></i>
-                        Create Token (Fee: ~0.02 SOL)
-                    </button>
-</div>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <h1>Orion Tools</h1>
             </div>
+            <nav>
+                <ul>
+                    <li><a href="#">Token Creator</a></li>
+                    <li><a href="#">Create Liquidity</a></li>
+                    <li><a href="#">Swap Token</a></li>
+                    <li><a href="#">Remove Liquidity</a></li>
+                    <li><a href="#">Burn Token</a></li>
+                    <li><a href="#">Leaderboard</a></li>
+                </ul>
+            </nav>
         </div>
+    </header>
 
-        <div id="transactionModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-            <div class="bg-gray-800 rounded-2xl p-8 max-w-md w-full mx-4">
-                <div class="text-center">
-                    <div id="loadingSpinner" class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"></div>
-                    <h3 class="text-xl font-bold mb-2" id="modalTitle">Creating Your Token</h3>
-                    <p class="text-gray-300 mb-6" id="modalMessage">Please approve the transaction in your wallet</p>
-                    <div id="successContent" class="hidden">
-                        <i data-feather="check-circle" class="text-green-500 w-12 h-12 mx-auto mb-4"></i>
-                        <h3 class="text-xl font-bold mb-2">Token Created Successfully!</h3>
-                        <p class="text-gray-300 mb-4" id="successMessage"></p>
-                        <a href="#" id="explorerLink" target="_blank" class="text-purple-400 hover:text-purple-300 inline-flex items-center">
-                            View on Solana Explorer <i data-feather="external-link" class="ml-1 w-4 h-4"></i>
-                        </a>
-                    </div>
-                    <div id="errorContent" class="hidden">
-                        <i data-feather="x-circle" class="text-red-500 w-12 h-12 mx-auto mb-4"></i>
-                        <h3 class="text-xl font-bold mb-2">Error Creating Token</h3>
-                        <p class="text-gray-300 mb-4" id="errorMessage"></p>
-                    </div>
-                    <button id="closeModalBtn" class="mt-6 px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors hidden">
-                        Close
-                    </button>
-                </div>
+    <section class="token-creator">
+        <h2>Solana Token Creator</h2>
+        <p>The perfect tool to create Solana SPL tokens. Simple, user-friendly, and fast.</p>
+
+        <!-- BOTÓN DE WALLET -->
+        <button id="connectWalletBtn" class="wallet-btn">Conectar Wallet</button>
+
+        <!-- FORMULARIO -->
+        <form id="token-form" class="creator-form">
+
+            <label for="token-name">Name</label>
+            <input type="text" id="token-name" placeholder="Enter token name" required>
+
+            <label for="token-symbol">Symbol</label>
+            <input type="text" id="token-symbol" placeholder="Enter token symbol" maxlength="8" required>
+
+            <label for="token-decimals">Decimals</label>
+            <input type="number" id="token-decimals" value="6" required>
+
+            <label for="token-supply">Supply</label>
+            <input type="number" id="token-supply" placeholder="Enter supply amount" required>
+
+            <label for="token-description">Description</label>
+            <textarea id="token-description" placeholder="Enter token description"></textarea>
+
+            <label for="token-image">Image (PNG)</label>
+            <input type="file" id="token-image" accept="image/*">
+
+            <div class="options">
+                <label>
+                    <input type="checkbox" id="freeze-authority">
+                    Revoke Freeze Authority
+                </label>
+
+                <label>
+                    <input type="checkbox" id="mint-authority">
+                    Revoke Mint Authority
+                </label>
             </div>
+
+            <button type="submit" class="create-btn">Create Token</button>
+
+        </form>
+
+        <div class="info">
+            <h3>How to use Solana Token Creator</h3>
+            <ul>
+                <li>1. Connect your Solana wallet.</li>
+                <li>2. Specify the desired name for your Token.</li>
+                <li>3. Indicate the symbol (max 8 characters).</li>
+                <li>4. Select the decimals quantity (default is 6).</li>
+                <li>5. Provide a brief description for your SPL Token.</li>
+                <li>6. Upload the image for your token (PNG).</li>
+                <li>7. Determine the Supply of your Token.</li>
+            </ul>
         </div>
-    </main>
+    </section>
 
-    <custom-footer></custom-footer>
-
-    <script src="components/navbar.js"></script>
-    <script src="components/footer.js"></script>
-    <script src="components/language-selector.js"></script>
-    <script src="script.js"></script>
-<script>
-        feather.replace();
-    </script>
-<script src="https://huggingface.co/deepsite/deepsite-badge.js"></script>
+    <footer>
+        <p>&copy; 2025 Tokens tools. All Rights Reserved.</p>
+    </footer>
 </body>
 </html>
