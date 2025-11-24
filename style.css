@@ -15,6 +15,7 @@ body {
     height: 100vh;
     flex-direction: column;
     overflow-x: hidden;
+    padding-top: 80px; /* Avoid overlap with fixed header */
 }
 
 header {
@@ -177,4 +178,3 @@ footer {
     justify-content: space-between;
     gap: 15px;
 }
-
