@@ -13,12 +13,14 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
+    flex-direction: column;
+    overflow-x: hidden;
 }
 
 header {
     background-color: #1e1e1e;
-    padding: 15px 0;
     width: 100%;
+    padding: 15px 0;
     position: fixed;
     top: 0;
     left: 0;
@@ -54,12 +56,12 @@ nav a:hover {
 
 .token-creator {
     max-width: 1000px;
-    margin-top: 100px; /* Adjust for the fixed navbar */
-    padding: 20px;
+    padding: 30px;
     background-color: #232323;
     border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     width: 90%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    margin-top: 100px;
 }
 
 .token-creator h2 {
@@ -132,9 +134,9 @@ footer {
     padding: 20px;
     background-color: #1e1e1e;
     margin-top: 50px;
-    position: absolute;
-    bottom: 0;
     width: 100%;
+    position: fixed;
+    bottom: 0;
 }
 
 .info h3 {
