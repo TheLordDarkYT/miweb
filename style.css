@@ -9,11 +9,20 @@ body {
     font-family: Arial, sans-serif;
     background-color: #121212;
     color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
 header {
     background-color: #1e1e1e;
     padding: 15px 0;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
 }
 
 .navbar {
@@ -45,10 +54,12 @@ nav a:hover {
 
 .token-creator {
     max-width: 1000px;
-    margin: 50px auto;
+    margin-top: 100px; /* Adjust for the fixed navbar */
     padding: 20px;
     background-color: #232323;
     border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    width: 90%;
 }
 
 .token-creator h2 {
@@ -80,6 +91,7 @@ nav a:hover {
 
 .creator-form label {
     font-size: 16px;
+    color: #e1e1e1;
 }
 
 .creator-form input, .creator-form textarea {
@@ -99,6 +111,7 @@ nav a:hover {
 .options label {
     font-size: 14px;
     margin-left: 5px;
+    color: #e1e1e1;
 }
 
 button.create-btn {
@@ -119,6 +132,9 @@ footer {
     padding: 20px;
     background-color: #1e1e1e;
     margin-top: 50px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
 }
 
 .info h3 {
@@ -135,4 +151,27 @@ footer {
 .info li {
     font-size: 16px;
     margin-bottom: 10px;
+}
+
+.creator-form input[type="file"] {
+    background-color: transparent;
+    color: #ffffff;
+    border: 1px solid #888;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.creator-form input[type="file"]:hover {
+    background-color: #444444;
+}
+
+.creator-form input[type="number"],
+.creator-form input[type="text"] {
+    width: 100%;
+}
+
+.creator-form .options {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
 }
